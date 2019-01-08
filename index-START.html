@@ -28,8 +28,57 @@
 <script>
   const addItems = document.querySelector('.add-items');
   const itemsList = document.querySelector('.plates');
-  const items = [];
+  const items = JSON.parse(localStorage.getItem('items')) || [];
 
+  function toggleCheckbox(e) {
+    console.log(this);
+    let itemNumber = this.getAttribute('for');
+    let checkbox = itemsList.querySelector(`input[data-value=${itemNumber}]`);
+    let checked = checkbox.checked;
+
+    checkbox.checked = !checked;
+  }
+
+  function addItem(e) {
+    e.preventDefault();
+
+    let item = {
+      name: document.querySelector('input[name="item"]').value,
+      checked: false
+    };
+    items.push(item);
+    populateList(items, itemsList);
+    document.querySelector('form').reset();
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  function populateList(items = [], platesList) {
+    platesList.innerHTML = items.map((p, i) => {
+      let checked = p.checked ? "checked" : "";
+      return `
+        <li>
+          <input type="checkbox" data-value=item-${i} ${checked}>
+          <label for="item-${i}" data-index="${i}">${p.name}</label>
+        </li>
+      `;
+    }).join('');
+
+    document.querySelectorAll('label[for*="item"]').forEach(function(e) {
+      e.addEventListener('click', toggleCheckbox);
+    });
+  }
+
+  function toggleChecked(e) {
+    if (!e.target.matches('label')) return;
+    let index = e.target.dataset.index;
+    items[index].checked = !items[index].checked; 
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  addItems.addEventListener('submit', addItem);
+  itemsList.addEventListener('click', toggleChecked);
+  
+  populateList(items, itemsList);
 </script>
 
 
